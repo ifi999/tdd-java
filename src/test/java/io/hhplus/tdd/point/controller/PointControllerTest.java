@@ -40,4 +40,45 @@ class PointControllerTest {
         assertThat(충전된_금액).isEqualTo(10000L);
     }
 
+    @Test
+    void 포인트_사용() {
+        // given
+        final long 포인트_ID = 2L;
+        final long 충전금액 = 10000L;
+        final long 사용금액 = 1000L;
+
+        given()
+            .log().all()
+            .body(충전금액)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .when()
+            .patch("/point/{id}/charge", 포인트_ID)
+        .then()
+            .statusCode(HttpStatus.OK.value())
+            .log().all()
+        .extract()
+            .jsonPath();
+
+        // when
+        final JsonPath 포인트_사용_응답 =
+            given()
+                .log().all()
+                .body(사용금액)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .when()
+            .patch("/point/{id}/use", 포인트_ID)
+                .then()
+            .statusCode(HttpStatus.OK.value())
+                .log().all()
+            .extract()
+                .jsonPath();
+
+        // then
+        final long 사용된_포인트_ID = 포인트_사용_응답.getLong("id");
+        final long 사용된_금액 = 포인트_사용_응답.getLong("point");
+
+        assertThat(사용된_포인트_ID).isEqualTo(2L);
+        assertThat(사용된_금액).isEqualTo(9000L);
+    }
+
 }

@@ -24,4 +24,15 @@ public class UserPointService {
         return userPoint;
     }
 
+    public UserPoint use(final long id, final long amount) {
+        if (amount <= 0) throw new IllegalArgumentException("Invalid amount.");
+
+        final UserPoint existingUserPoint = userPointTable.selectById(id);
+        if (existingUserPoint.point() - amount < 0) throw new IllegalArgumentException("Invalid amount.");
+
+        final long newAmount = existingUserPoint.point() - amount;
+        final UserPoint userPoint = userPointTable.insertOrUpdate(id, newAmount);
+
+        return userPoint;
+    }
 }

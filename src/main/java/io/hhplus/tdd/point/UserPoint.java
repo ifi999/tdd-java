@@ -10,7 +10,7 @@ public record UserPoint(
         return new UserPoint(id, 0, System.currentTimeMillis());
     }
 
-    public static UserPoint addPoint(final long id, final long point) {
+    public static UserPoint changePoint(final long id, final long point) {
         return new UserPoint(
             id,
             point,

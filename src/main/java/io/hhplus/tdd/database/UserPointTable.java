@@ -23,7 +23,7 @@ public class UserPointTable {
     public UserPoint insertOrUpdate(long id, long amount) {
         throttle(300);
 
-        final UserPoint userPoint = UserPoint.addPoint(id, amount);
+        final UserPoint userPoint = UserPoint.changePoint(id, amount);
         table.put(id, userPoint);
 
         return userPoint;
