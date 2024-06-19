@@ -22,8 +22,10 @@ public class UserPointTable {
 
     public UserPoint insertOrUpdate(long id, long amount) {
         throttle(300);
-        UserPoint userPoint = new UserPoint(id, amount, System.currentTimeMillis());
+
+        final UserPoint userPoint = UserPoint.addPoint(id, amount);
         table.put(id, userPoint);
+
         return userPoint;
     }
 

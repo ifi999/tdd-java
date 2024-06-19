@@ -9,4 +9,13 @@ public record UserPoint(
     public static UserPoint empty(long id) {
         return new UserPoint(id, 0, System.currentTimeMillis());
     }
+
+    public static UserPoint addPoint(final long id, final long point) {
+        return new UserPoint(
+            id,
+            point,
+            System.currentTimeMillis()
+        );
+    }
+
 }
