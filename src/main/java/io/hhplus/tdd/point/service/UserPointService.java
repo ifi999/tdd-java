@@ -35,4 +35,11 @@ public class UserPointService {
 
         return userPoint;
     }
+
+    public UserPoint point(final long id) {
+        final UserPoint existingUserPoint = userPointTable.selectById(id);
+
+        return existingUserPoint;
+    }
+
 }

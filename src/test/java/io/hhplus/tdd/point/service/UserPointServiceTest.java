@@ -33,6 +33,10 @@ class UserPointServiceTest {
      * - 잔액보다 큰 금액을 사용하면 예외 발생
      * - 음수 포인트를 사용하면 예외 발생
      * - 0 포인트를 사용하면 예외 발생
+     *
+     * 3. 포인트 조회 기능
+     * - 보유 포인트가 있는 사용자의 포인트 조회
+     * - 보유 포인트가 없는 사용자의 포인트 조회
      */
     @Test
     void 포인트를_충전한다() {
@@ -172,6 +176,23 @@ class UserPointServiceTest {
         assertThatThrownBy(() -> userPointService.use(사용자ID, 사용포인트))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Invalid amount.");
+    }
+
+    @Test
+    void 보유_포인트가_있는_사용자의_포인트_조회() {
+        // given
+        final long 사용자ID = 1L;
+        final long 보유포인트 = 3000L;
+
+        given(userPointTable.selectById(사용자ID))
+            .willReturn(new UserPoint(사용자ID, 보유포인트, System.currentTimeMillis()));
+
+        // when
+        final UserPoint 사용자_포인트 = userPointService.point(사용자ID);
+
+        // then
+        assertThat(사용자_포인트.id()).isEqualTo(1L);
+        assertThat(사용자_포인트.point()).isEqualTo(3000L);
     }
 
 }
