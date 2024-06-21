@@ -1,7 +1,8 @@
 package io.hhplus.tdd.point.service;
 
-import io.hhplus.tdd.point.PointHistory;
-import io.hhplus.tdd.point.UserPoint;
+import io.hhplus.tdd.point.application.UserPointService;
+import io.hhplus.tdd.point.domain.history.PointHistory;
+import io.hhplus.tdd.point.domain.point.UserPoint;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,11 +24,11 @@ public class UserPointServiceIntegrationTest {
         ExecutorService executorService = Executors.newFixedThreadPool(4);
         CountDownLatch latch = new CountDownLatch(4);
 
-        userPointService.charge(사용자ID, 10000L);
+        userPointService.chargeUserPoint(사용자ID, 10000L);
 
         Future<UserPoint> future1 = executorService.submit(() -> {
             try {
-                return userPointService.charge(사용자ID, 1000L);
+                return userPointService.chargeUserPoint(사용자ID, 1000L);
             } finally {
                 latch.countDown();
             }
@@ -35,7 +36,7 @@ public class UserPointServiceIntegrationTest {
 
         Future<UserPoint> future2 = executorService.submit(() -> {
             try {
-                return userPointService.use(사용자ID, 500L);
+                return userPointService.useUserPoint(사용자ID, 500L);
             } finally {
                 latch.countDown();
             }
@@ -43,7 +44,7 @@ public class UserPointServiceIntegrationTest {
 
         Future<UserPoint> future3 = executorService.submit(() -> {
             try {
-                return userPointService.charge(사용자ID, 2000L);
+                return userPointService.chargeUserPoint(사용자ID, 2000L);
             } finally {
                 latch.countDown();
             }
@@ -51,7 +52,7 @@ public class UserPointServiceIntegrationTest {
 
         Future<UserPoint> future4 = executorService.submit(() -> {
             try {
-                return userPointService.use(사용자ID, 1000L);
+                return userPointService.useUserPoint(사용자ID, 1000L);
             } finally {
                 latch.countDown();
             }
@@ -70,7 +71,7 @@ public class UserPointServiceIntegrationTest {
         assertThat(finalPoint3.point()).isEqualTo(12500L);
         assertThat(finalPoint4.point()).isEqualTo(11500L);
 
-        List<PointHistory> 포인트_내역_목록 = userPointService.history(사용자ID);
+        List<PointHistory> 포인트_내역_목록 = userPointService.getUserPointHistories(사용자ID);
 
         assertThat(포인트_내역_목록.size()).isEqualTo(5);
         assertThat(포인트_내역_목록.get(0).amount()).isEqualTo(10000L);

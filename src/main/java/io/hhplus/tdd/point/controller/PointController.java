@@ -1,8 +1,13 @@
 package io.hhplus.tdd.point.controller;
 
-import io.hhplus.tdd.point.PointHistory;
-import io.hhplus.tdd.point.UserPoint;
-import io.hhplus.tdd.point.service.UserPointService;
+import io.hhplus.tdd.ApiResponse;
+import io.hhplus.tdd.point.controller.dto.ChargePointResponse;
+import io.hhplus.tdd.point.controller.dto.GetPointHistoryResponse;
+import io.hhplus.tdd.point.controller.dto.UsePointResponse;
+import io.hhplus.tdd.point.domain.history.PointHistory;
+import io.hhplus.tdd.point.domain.point.UserPoint;
+import io.hhplus.tdd.point.controller.dto.GetPointResponse;
+import io.hhplus.tdd.point.application.UserPointService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -25,49 +30,49 @@ public class PointController {
      * TODO - 특정 유저의 포인트를 조회하는 기능을 작성해주세요.
      */
     @GetMapping("{id}")
-    public UserPoint point(
+    public ApiResponse<GetPointResponse> point(
             @PathVariable long id
     ) {
-        final UserPoint userPoint = userPointService.point(id);
+        final UserPoint userPoint = userPointService.getUserPoint(id);
 
-        return userPoint;
+        return ApiResponse.isOk(GetPointResponse.toDto(userPoint));
     }
 
     /**
      * TODO - 특정 유저의 포인트 충전/이용 내역을 조회하는 기능을 작성해주세요.
      */
     @GetMapping("{id}/histories")
-    public List<PointHistory> history(
+    public ApiResponse<List<GetPointHistoryResponse>> history(
             @PathVariable long id
     ) {
-        final List<PointHistory> histories = userPointService.history(id);
+        final List<PointHistory> histories = userPointService.getUserPointHistories(id);
 
-        return histories;
+        return ApiResponse.isOk(GetPointHistoryResponse.toDto(histories));
     }
 
     /**
      * TODO - 특정 유저의 포인트를 충전하는 기능을 작성해주세요.
      */
     @PatchMapping("{id}/charge")
-    public UserPoint charge(
+    public ApiResponse<ChargePointResponse> charge(
             @PathVariable long id,
             @RequestBody long amount
     ) {
-        final UserPoint userPoint = userPointService.charge(id, amount);
+        final UserPoint userPoint = userPointService.chargeUserPoint(id, amount);
 
-        return userPoint;
+        return ApiResponse.isOk(ChargePointResponse.toDto(userPoint));
     }
 
     /**
      * TODO - 특정 유저의 포인트를 사용하는 기능을 작성해주세요.
      */
     @PatchMapping("{id}/use")
-    public UserPoint use(
+    public ApiResponse<UsePointResponse> use(
             @PathVariable long id,
             @RequestBody long amount
     ) {
-        final UserPoint userPoint = userPointService.use(id, amount);
+        final UserPoint userPoint = userPointService.useUserPoint(id, amount);
 
-        return userPoint;
+        return ApiResponse.isOk(UsePointResponse.toDto(userPoint));
     }
 }
