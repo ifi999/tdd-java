@@ -8,9 +8,15 @@ import io.hhplus.tdd.point.UserPoint;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 public class UserPointService {
+
+    private final Map<Long, Lock> lockMap = new ConcurrentHashMap<>();
 
     private final UserPointTable userPointTable;
     private final PointHistoryTable pointHistoryTable;
@@ -23,26 +29,40 @@ public class UserPointService {
     public UserPoint charge(final long id, final long amount) {
         if (amount < 0) throw new IllegalArgumentException("Invalid amount.");
 
-        final UserPoint existingUserPoint = userPointTable.selectById(id);
-        final long newAmount = existingUserPoint.point() + amount;
+        final Lock lock = lockMap.computeIfAbsent(id, o -> new ReentrantLock());
+        lock.lock();
 
-        final UserPoint userPoint = userPointTable.insertOrUpdate(id, newAmount);
-        pointHistoryTable.insert(id, existingUserPoint.point() + amount, TransactionType.CHARGE, System.currentTimeMillis());
+        try {
+            final UserPoint existingUserPoint = userPointTable.selectById(id);
+            final long newAmount = existingUserPoint.point() + amount;
+            final UserPoint userPoint = userPointTable.insertOrUpdate(id, newAmount);
+            pointHistoryTable.insert(id, newAmount, TransactionType.CHARGE, System.currentTimeMillis());
 
-        return userPoint;
+            return userPoint;
+        } finally {
+            lock.unlock();
+        }
+
     }
 
     public UserPoint use(final long id, final long amount) {
         if (amount <= 0) throw new IllegalArgumentException("Invalid amount.");
 
-        final UserPoint existingUserPoint = userPointTable.selectById(id);
-        if (existingUserPoint.point() - amount < 0) throw new IllegalArgumentException("Invalid amount.");
+        final Lock lock = lockMap.computeIfAbsent(id, o -> new ReentrantLock());
+        lock.lock();
 
-        final long newAmount = existingUserPoint.point() - amount;
-        final UserPoint userPoint = userPointTable.insertOrUpdate(id, newAmount);
-        pointHistoryTable.insert(id, newAmount, TransactionType.USE, System.currentTimeMillis());
+        try {
+            final UserPoint existingUserPoint = userPointTable.selectById(id);
+            if (existingUserPoint.point() - amount < 0) throw new IllegalArgumentException("Invalid amount.");
 
-        return userPoint;
+            final long newAmount = existingUserPoint.point() - amount;
+            final UserPoint userPoint = userPointTable.insertOrUpdate(id, newAmount);
+            pointHistoryTable.insert(id, newAmount, TransactionType.USE, System.currentTimeMillis());
+
+            return userPoint;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public UserPoint point(final long id) {
